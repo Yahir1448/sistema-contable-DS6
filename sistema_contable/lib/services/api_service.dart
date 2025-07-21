@@ -12,9 +12,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> login(
-    String correo,
-    String password,
-  ) async {
+      String correo, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/login'),
       headers: {'Content-Type': 'application/json'},
@@ -52,10 +50,39 @@ class ApiService {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
-      body: jsonEncode(transaccion.toJson()),
+      body: jsonEncode({
+        ...transaccion.toJson(),
+        'repetir_cada': transaccion.toJson()['repetir_cada'],
+      }),
     );
     if (response.statusCode != 200) {
       throw Exception('Error al crear transacción: ${response.body}');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getCategorias() async {
+    final token = await getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/categorias'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+    } else {
+      throw Exception('Error al obtener categorías: ${response.body}');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getCuentas() async {
+    final token = await getToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/cuentas'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+    } else {
+      throw Exception('Error al obtener cuentas: ${response.body}');
     }
   }
 }
