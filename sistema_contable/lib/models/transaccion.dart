@@ -8,8 +8,6 @@ class Transaccion {
   final int? cuentaId;
   final String? nota;
   final String? descripcion;
-  final String? categoria;
-  final String? cuenta;
 
   Transaccion({
     required this.id,
@@ -21,8 +19,6 @@ class Transaccion {
     this.cuentaId,
     this.nota,
     this.descripcion,
-    this.categoria,
-    this.cuenta,
   });
 
   factory Transaccion.fromJson(Map<String, dynamic> json) {
@@ -36,8 +32,6 @@ class Transaccion {
       cuentaId: json['cuenta_id'],
       nota: json['nota'],
       descripcion: json['descripcion'],
-      categoria: json['categoria'],
-      cuenta: json['cuenta'],
     );
   }
 
@@ -52,6 +46,7 @@ class Transaccion {
       'cuenta_id': cuentaId,
       'nota': nota,
       'descripcion': descripcion,
+      'repetir_cada': null, // Ajusta según necesidad
     };
   }
 }

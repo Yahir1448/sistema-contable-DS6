@@ -72,7 +72,8 @@ class TransaccionesScreen extends StatelessWidget {
 
   Future<List<Transaccion>> _fetchTransacciones() async {
     try {
-      return await ApiService.getTransacciones();
+      final data = await ApiService.getTransacciones();
+      return data.map((item) => Transaccion.fromJson(item)).toList();
     } catch (e) {
       return await DatabaseHelper.instance.getTransacciones();
     }

@@ -211,7 +211,8 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                               : _descripcionController.text,
                         );
                         try {
-                          await ApiService.createTransaccion(transaccion);
+                          await ApiService.createTransaccion(
+                              transaccion.toJson());
                           await DatabaseHelper.instance
                               .insertTransaccion(transaccion);
                           Navigator.pop(context);

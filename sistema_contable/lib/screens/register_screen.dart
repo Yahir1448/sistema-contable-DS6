@@ -61,14 +61,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
               onPressed: _acceptTerms
                   ? () async {
                       try {
-                        // TODO: Implement API call for registration
-                        await ApiService.login(
-                            _correoController.text, _passwordController.text);
+                        await ApiService.register(
+                          _nombreController.text,
+                          _correoController.text,
+                          _passwordController.text,
+                          _nombreController
+                              .text, // Ajusta si tienes campos separados
+                          _nombreController
+                              .text, // Ajusta si tienes campos separados
+                        );
                         Navigator.pop(context);
                       } catch (e) {
                         setState(() {
                           _error = 'Error en el registro: $e';
                         });
+                        print('Detalles del error: $e'); // Para depuración
                       }
                     }
                   : null,

@@ -8,7 +8,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> login(String correo, String password) async {
     try {
-      _user = await ApiService.login(correo, password);
+      final response = await ApiService.login(correo, password);
+      _user = response['user']; // Ajusta según la respuesta del backend
       notifyListeners();
     } catch (e) {
       throw Exception('Error en el login: $e');
