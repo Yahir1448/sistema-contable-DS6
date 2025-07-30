@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
+import '../database/database_helper.dart';
 
 class BudgetScreen extends StatelessWidget {
+  final int usuarioId;
+
+  const BudgetScreen({super.key, required this.usuarioId});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Presupuesto Mensual')),
-      body: FutureBuilder<List<dynamic>>(
+      appBar: AppBar(
+        title: const Text('Presupuesto Mensual'),
+        backgroundColor: const Color(0xFF1976D2),
+      ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchBudgets(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No hay presupuestos'));
+            return const Center(child: Text('No hay presupuestos'));
           }
           final budgets = snapshot.data!;
           return GridView.builder(
-            padding: EdgeInsets.all(16.0),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            padding: const EdgeInsets.all(16.0),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 16.0,
               mainAxisSpacing: 16.0,
@@ -31,15 +38,15 @@ class BudgetScreen extends StatelessWidget {
               return Card(
                 elevation: 4,
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Presupuesto Mensual',
                           style: Theme.of(context).textTheme.titleLarge),
-                      SizedBox(height: 8),
-                      Text('Presupuesto: \$${budget['monto_asignado'] ?? 0}'),
-                      Text('Gasto: \$${budget['monto_gastado'] ?? 0}'),
+                      const SizedBox(height: 8),
+                      Text('Presupuesto: \$${budget['monto_asignado']}'),
+                      Text('Gasto: \$${budget['monto_gastado']}'),
                     ],
                   ),
                 ),
@@ -51,11 +58,12 @@ class BudgetScreen extends StatelessWidget {
     );
   }
 
-  Future<List<dynamic>> _fetchBudgets() async {
-    // TODO: Implement API call to fetch budgets from 'presupuestos' table
-    return [
-      {'monto_asignado': 0, 'monto_gastado': 0},
-      {'monto_asignado': 0, 'monto_gastado': 0},
-    ]; // Placeholder data
+  Future<List<Map<String, dynamic>>> _fetchBudgets() async {
+    final db = await DatabaseHelper.instance.database;
+    return await db.query(
+      'presupuestos',
+      where: 'usuario_id = ?',
+      whereArgs: [usuarioId],
+    );
   }
 }

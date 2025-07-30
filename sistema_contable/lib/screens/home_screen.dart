@@ -1,70 +1,115 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
-import 'transacciones_screen.dart';
-import 'budget_screen.dart';
-import 'accounts_screen.dart';
+import 'package:sistema_contable/screens/registrar_transaccion.dart';
+import 'package:sistema_contable/screens/transacciones_screen.dart';
+import 'package:sistema_contable/screens/budget_screen.dart';
+import 'package:sistema_contable/screens/accounts_screen.dart';
+import 'package:sistema_contable/screens/login.dart';
 
 class HomeScreen extends StatelessWidget {
+  final int usuarioId;
+
+  const HomeScreen({super.key, required this.usuarioId});
+
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<AuthProvider>(context).user;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sistema Contable'),
+        title: const Text('Sistema Contable'),
+        backgroundColor: const Color(0xFF1976D2),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await Provider.of<AuthProvider>(context, listen: false).logout();
-              Navigator.pushReplacementNamed(context, '/login');
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
             },
+            tooltip: 'Cerrar Sesión',
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('¡Hola, ${user?['nombre'] ?? 'Usuario'}!',
-                style: Theme.of(context).textTheme.headlineSmall),
-            SizedBox(height: 16),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                children: [
-                  _buildNavCard(context, 'Transacciones', Icons.list,
-                      TransaccionesScreen()),
-                  _buildNavCard(context, 'Presupuestos',
-                      Icons.account_balance_wallet, BudgetScreen()),
-                  _buildNavCard(context, 'Cuentas', Icons.account_balance,
-                      AccountsScreen()),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavCard(
-      BuildContext context, String title, IconData icon, Widget screen) {
-    return Card(
-      elevation: 4,
-      child: InkWell(
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
-        },
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 48),
-            SizedBox(height: 8),
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        RegistrarTransaccionScreen(usuarioId: usuarioId),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1976D2),
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                textStyle: const TextStyle(fontSize: 16),
+              ),
+              child: const Text('Registrar Transacción'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        TransaccionesScreen(usuarioId: usuarioId),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1976D2),
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                textStyle: const TextStyle(fontSize: 16),
+              ),
+              child: const Text('Ver Transacciones'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BudgetScreen(usuarioId: usuarioId),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1976D2),
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                textStyle: const TextStyle(fontSize: 16),
+              ),
+              child: const Text('Ver Presupuestos'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AccountsScreen(usuarioId: usuarioId),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1976D2),
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                textStyle: const TextStyle(fontSize: 16),
+              ),
+              child: const Text('Ver Cuentas'),
+            ),
           ],
         ),
       ),

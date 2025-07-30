@@ -1,29 +1,47 @@
 import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
 
 class AccountsScreen extends StatelessWidget {
+  final int usuarioId;
+
+  const AccountsScreen({super.key, required this.usuarioId});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Cuentas')),
+      appBar: AppBar(
+        title: const Text('Cuentas'),
+        backgroundColor: const Color(0xFF1976D2),
+      ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchAccounts(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No hay cuentas'));
+            return const Center(child: Text('No hay cuentas'));
           }
           final accounts = snapshot.data!;
+          double totalCapital = accounts.fold(
+              0.0,
+              (sum, acc) =>
+                  sum + (acc['saldo_actual'] > 0 ? acc['saldo_actual'] : 0));
+          double totalDeuda = accounts.fold(
+              0.0,
+              (sum, acc) =>
+                  sum + (acc['saldo_actual'] < 0 ? -acc['saldo_actual'] : 0));
+          double balance = totalCapital - totalDeuda;
+
           return Column(
             children: [
               Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Table(
                   border: TableBorder.all(),
                   children: [
-                    TableRow(
+                    const TableRow(
                       children: [
                         Padding(
                           padding: EdgeInsets.all(8.0),
@@ -45,12 +63,17 @@ class AccountsScreen extends StatelessWidget {
                     TableRow(
                       children: [
                         Padding(
-                            padding: EdgeInsets.all(8.0), child: Text('1.95')),
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text('\$${totalCapital.toStringAsFixed(2)}'),
+                        ),
                         Padding(
-                            padding: EdgeInsets.all(8.0), child: Text('41.95')),
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text('\$${totalDeuda.toStringAsFixed(2)}'),
+                        ),
                         Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text('-40.00')),
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text('\$${balance.toStringAsFixed(2)}'),
+                        ),
                       ],
                     ),
                   ],
@@ -64,7 +87,8 @@ class AccountsScreen extends StatelessWidget {
                     return ListTile(
                       title: Text(account['nombre']),
                       subtitle: Text('Tipo: ${account['tipo']}'),
-                      trailing: Text('\$${account['saldo_actual']}'),
+                      trailing: Text(
+                          '\$${account['saldo_actual'].toStringAsFixed(2)}'),
                     );
                   },
                 ),
@@ -77,15 +101,11 @@ class AccountsScreen extends StatelessWidget {
   }
 
   Future<List<Map<String, dynamic>>> _fetchAccounts() async {
-    // TODO: Implement API call to fetch accounts from 'cuentas' table
-    return [
-      {'nombre': 'Efectivo', 'tipo': 'efectivo', 'saldo_actual': 0.00},
-      {'nombre': 'Banco', 'tipo': 'banco', 'saldo_actual': 0.00},
-      {
-        'nombre': 'Tarjeta de Crédito',
-        'tipo': 'tarjeta_credito',
-        'saldo_actual': 0.00
-      },
-    ];
+    final db = await DatabaseHelper.instance.database;
+    return await db.query(
+      'cuentas',
+      where: 'usuario_id = ?',
+      whereArgs: [usuarioId],
+    );
   }
 }

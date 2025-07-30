@@ -1,38 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/transaccion.dart';
-import '../services/api_service.dart';
-import '../services/database_helper.dart';
-import 'transaction_form_screen.dart';
-import '../utils/extensions.dart';
+import 'package:sistema_contable/models/transaccion.dart';
+import 'package:sistema_contable/database/database_helper.dart';
+import 'package:sistema_contable/screens/registrar_transaccion.dart';
+import 'package:sistema_contable/utils/extensions.dart';
 
 class TransaccionesScreen extends StatelessWidget {
+  final int usuarioId;
+
+  const TransaccionesScreen({super.key, required this.usuarioId});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Transacciones'),
+        title: const Text('Transacciones'),
+        backgroundColor: const Color(0xFF1976D2),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => TransactionFormScreen()),
+                MaterialPageRoute(
+                  builder: (_) =>
+                      RegistrarTransaccionScreen(usuarioId: usuarioId),
+                ),
               );
             },
           ),
         ],
       ),
       body: FutureBuilder<List<Transaccion>>(
-        future: _fetchTransacciones(),
+        future: DatabaseHelper.instance.getTransacciones(usuarioId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No hay transacciones'));
+            return const Center(child: Text('No hay transacciones'));
           }
           final transacciones = snapshot.data!;
           final grouped = _groupByDate(transacciones);
@@ -55,8 +62,10 @@ class TransaccionesScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              TransactionFormScreen(transaccion: transaccion),
+                          builder: (_) => RegistrarTransaccionScreen(
+                            usuarioId: usuarioId,
+                            transaccion: transaccion,
+                          ),
                         ),
                       );
                     },
@@ -68,15 +77,6 @@ class TransaccionesScreen extends StatelessWidget {
         },
       ),
     );
-  }
-
-  Future<List<Transaccion>> _fetchTransacciones() async {
-    try {
-      final data = await ApiService.getTransacciones();
-      return data.map((item) => Transaccion.fromJson(item)).toList();
-    } catch (e) {
-      return await DatabaseHelper.instance.getTransacciones();
-    }
   }
 
   Map<DateTime, List<Transaccion>> _groupByDate(
